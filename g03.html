@@ -2844,6 +2844,10 @@ document.getElementById('board').addEventListener('click',function(){
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(later);
   later();
 })();</script>
+<style id="panel-wide-202611">
+/* 2026-11-04：桌機右邊故事欄加寬約兩倍（題目板會自動讓出空間）；手機不變 */
+@media (min-width:901px){.layout:not(.board-collapsed):not(.panel-collapsed) #panel{flex:0 0 clamp(440px,24vw,640px)!important;width:clamp(440px,24vw,640px)!important;max-width:none!important}}
+</style>
 <script src="game-bar.js?v=5"></script>
 </body>
 </html>
