@@ -285,6 +285,12 @@
       }
     }
   </style>
+<style id="num-size-202611">
+/* 2026-11-04：數字大小跟著格子走（不再跟著視窗寬度），桌機、手機、同步視窗裡都不會超出格子 */
+.tile{container-type:inline-size}
+.tile-number{font-size:clamp(28px,6vw,96px)!important}
+@supports (font-size:1cqi){.tile-number{font-size:42cqi!important}}
+</style>
 </head>
 <body>
   <main>
