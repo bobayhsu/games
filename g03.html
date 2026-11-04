@@ -2817,6 +2817,33 @@ document.getElementById('board').addEventListener('click',function(){
 /* 手機直式：左上按鈕已移到題目板上方，第 1 格不用再空出左邊 */
 @media (max-width:700px) and (orientation:portrait){#board .cell:first-child .q{padding-left:0!important}}
 </style>
+<script>/* 2026-11-04：右邊故事欄的字自動調整大小——欄位多大，字就放到剛好塞滿、不超出（桌機放大、手機縮小） */
+(function(){
+  var panel=document.getElementById('panelMain'),parts=['storyarea','qnum'].map(function(i){return document.getElementById(i);}).filter(Boolean);
+  if(!panel||!parts.length)return;
+  function setZ(z){parts.forEach(function(e){e.style.zoom=z;});}
+  function fits(){var P=panel.getBoundingClientRect(),m=4,ok=true;
+    document.querySelectorAll('#storyarea .stage, #qnum > *').forEach(function(e){if(!ok||!e.offsetParent)return;
+      var rg=document.createRange();rg.selectNodeContents(e);var r=rg.getBoundingClientRect();if(!r.width&&!r.height)return; // 量「文字」實際佔的範圍，不是框框
+      if(r.left<P.left-1||r.right>P.right+1||r.top<P.top-1||r.bottom>P.bottom-m)ok=false;});
+    return ok;}
+  var busy=false;
+  function fit(){if(busy)return;busy=true;try{
+    var area=document.getElementById('storyarea');if(!area||!area.offsetParent||!panel.getBoundingClientRect().width){setZ(1);return;}
+    setZ(1);var st=document.querySelector('#storyarea .stage'),base=st?parseFloat(getComputedStyle(st).fontSize)||20:20;
+    var small=Math.min(innerWidth,innerHeight)<=500, maxPx=small?17:60; // 手機：故事字最大約 17px
+    var lo=0.5,hi=Math.max(0.55,Math.min(2.4,maxPx/base));setZ(lo);if(!fits()){return;}
+    for(var k=0;k<9;k++){var mid=(lo+hi)/2;setZ(mid);if(fits())lo=mid;else hi=mid;}
+    setZ(Math.floor(lo*100)/100);
+  }finally{busy=false;}}
+  var t;function later(){clearTimeout(t);t=setTimeout(fit,60);}
+  var mo=new MutationObserver(later);
+  mo.observe(document.getElementById('panel'),{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});
+  var lay=document.querySelector('.layout');if(lay)mo.observe(lay,{attributes:true,attributeFilter:['class']});
+  addEventListener('resize',later);addEventListener('orientationchange',function(){setTimeout(fit,300);});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(later);
+  later();
+})();</script>
 <script src="game-bar.js?v=5"></script>
 </body>
 </html>
