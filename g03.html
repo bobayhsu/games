@@ -2808,10 +2808,10 @@ document.getElementById('board').addEventListener('click',function(){
     if(r.top>innerHeight*0.5)p.scrollIntoView({behavior:'smooth',block:'start'});},200);
 });</script>
 <style id="cell-size-202611">
-/* 2026-11-04：題目字的大小改成跟著格子寬度走——大螢幕格子大、字就大；手機格子小、字就小 */
+/* 2026-11-04：（再大三級）題目字的大小改成跟著格子寬度走——大螢幕格子大、字就大；手機格子小、字就小 */
 #board .cell{container-type:inline-size}
-#board .cell .q,#board .cell.selected .q,#board .cell.lit .q,#board .cell.win .q{font-size:clamp(11px,10cqi,42px)!important;line-height:1.3!important}
-#board.dim-active .cell.hovering .q{font-size:clamp(12px,11.5cqi,48px)!important;line-height:1.22!important}
+#board .cell .q,#board .cell.selected .q,#board .cell.lit .q,#board .cell.win .q{font-size:clamp(15px,14cqi,58px)!important;line-height:1.3!important}
+#board.dim-active .cell.hovering .q{font-size:clamp(15px,14cqi,58px)!important;line-height:1.3!important}
 #board .cell .num,#board .cell.selected .num,#board .cell.lit .num,#board .cell.win .num{font-size:clamp(10px,5cqi,22px)!important}
 #board.dim-active .cell.hovering .num{font-size:clamp(10px,5.5cqi,24px)!important}
 /* 手機直式：左上按鈕已移到題目板上方，第 1 格不用再空出左邊 */
@@ -2875,10 +2875,10 @@ document.getElementById('board').addEventListener('click',function(){
 <style id="phone-size-202611">
 /* 2026-11-04：手機（觸控或小螢幕）直拿、橫拿，題目字大小都一樣：依螢幕短邊計算，不受方向影響 */
 @media (pointer:coarse),(max-width:700px),(max-height:500px){
-#board .cell .q,#board .cell.selected .q,#board .cell.lit .q,#board .cell.win .q,#board.dim-active .cell.hovering .q{font-size:var(--pfs,clamp(11px,3.2vmin,15px))!important;line-height:1.3!important}
+#board .cell .q,#board .cell.selected .q,#board .cell.lit .q,#board .cell.win .q,#board.dim-active .cell.hovering .q{font-size:var(--pfs,clamp(15px,4.5vmin,21px))!important;line-height:1.3!important}
 }
 </style>
-<script>/* 依「螢幕」短邊（不是視窗），直拿橫拿算出來都一樣 */(function(){var w=screen.width||innerWidth,h=screen.height||innerHeight,m=Math.min(w,h);document.documentElement.style.setProperty('--pfs',Math.max(11,Math.min(15,m*0.032)).toFixed(1)+'px');})();</script>
+<script>/* 依「螢幕」短邊（不是視窗），直拿橫拿算出來都一樣 */(function(){var w=screen.width||innerWidth,h=screen.height||innerHeight,m=Math.min(w,h);document.documentElement.style.setProperty('--pfs',Math.max(15,Math.min(21,m*0.045)).toFixed(1)+'px');})();</script>
 <script src="game-bar.js?v=6"></script>
 </body>
 </html>
