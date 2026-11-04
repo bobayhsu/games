@@ -2823,7 +2823,7 @@ document.getElementById('board').addEventListener('click',function(){
   var panel=document.getElementById('panelMain');if(!panel)return;
   var SEL='#storyarea .stage, #storyarea .tag, #qnum > *';
   function els(){return Array.prototype.slice.call(document.querySelectorAll(SEL));}
-  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});document.querySelectorAll('#storyarea .stage, #qnum .qnum-value').forEach(function(e){e.style.removeProperty('font-family');e.style.removeProperty('font-weight');});}
+  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});document.querySelectorAll('#storyarea .stage, #qnum .qnum-value').forEach(function(e){e.style.removeProperty('font-family');e.style.removeProperty('font-weight');});var qn=document.getElementById('qnum');if(qn)qn.style.removeProperty('margin-left');}
   function setK(list,base,k){list.forEach(function(e,i){e.style.setProperty('font-size',(base[i]*k).toFixed(2)+'px','important');});}
   function fits(){var P=panel.getBoundingClientRect(),ok=true; // 只看三段故事文字有沒有超出欄位的左邊或下緣
     document.querySelectorAll('#storyarea .stage').forEach(function(e){if(!ok||!e.offsetParent)return;
@@ -2840,6 +2840,8 @@ document.getElementById('board').addEventListener('click',function(){
     var q=document.querySelector('#board .cell:not(.hovering) .q'),qs=q?getComputedStyle(q):null,qPx=qs?parseFloat(qs.fontSize)||b0:b0;
     if(qs)document.querySelectorAll('#storyarea .stage, #qnum .qnum-value').forEach(function(e){e.style.setProperty('font-family',qs.fontFamily,'important');});
     if(qs)document.querySelectorAll('#storyarea .stage').forEach(function(e){e.style.setProperty('font-weight',qs.fontWeight,'important');});
+    /* 標題（例如「費德勒的眼淚」）和故事之間空一行 */
+    var qn=document.getElementById('qnum');if(qn)qn.style.setProperty('margin-left',Math.round(qPx*1.6)+'px','important');
     var hi=qPx/b0,lo=hi*0.5;
     setK(list,base,hi);if(fits())return;
     setK(list,base,lo);if(!fits()){setK(list,base,hi);return;}
