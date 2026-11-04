@@ -16,6 +16,13 @@ st.textContent='body{padding-bottom:calc(var(--gbar,64px) + env(safe-area-inset-
  '@media (max-width:360px){#gameBar a{width:31px;height:31px}#gameBar svg{width:17px;height:17px}}';
 document.head.appendChild(st);
 const toG=document.getElementById('toGames');if(toG)toG.style.display='none';
+/* 2026-11-04：遊戲頁按 F 也能切換全螢幕（在簡報同步視窗裡，就讓整個簡報全螢幕） */
+document.addEventListener('keydown',e=>{
+  if((e.key!=='f'&&e.key!=='F')||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
+  const t=e.target;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))return;
+  let d=document;if(inFrame){try{d=window.parent.document;}catch(_){}}
+  try{if(d.fullscreenElement)d.exitFullscreen();else{const p=d.documentElement.requestFullscreen();if(p&&p.catch)p.catch(()=>{});}}catch(_){}
+});
 if(inFrame){try{gameSync();}catch(e){console.warn('[遊戲同步] 啟動失敗',e);}return;}
 /* 2026-11-04：在簡報同步視窗裡，遊戲裡的操作也讓手機、桌機同步。
    點擊、輸入、送出都會傳給另一台照做；變色賓果有隨機，所以改傳整個盤面。 */

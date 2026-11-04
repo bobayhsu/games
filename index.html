@@ -68,6 +68,8 @@
       新增遊戲：把遊戲網頁放在這個專案的最外層，再在下面加一筆。
       file  檔名　title 標題　tags 標籤　minutes 預設分鐘（不需要可省略）　steps 步驟摘要
     */
+    /* 改了任何遊戲，就把這個數字改大一點，瀏覽器才會抓新版（避免看到暫存的舊版） */
+    const GAME_VER = '20261104b';
     const PRACTICES = [
       {
         file: 'g01.html',
@@ -108,7 +110,7 @@
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
     grid.innerHTML = PRACTICES.map((p, i) => `
       <li class="item">
-        <a class="tile" href="${esc(p.file)}">
+        <a class="tile" href="${esc(p.file)}?v=${GAME_VER}">
           <div class="top"><span class="no">${i + 1}</span><h3>${esc(p.title)}</h3></div>
           <div class="tags">${p.minutes ? `<span class="tag time">${p.minutes} 分鐘</span>` : ''}${(p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>
           ${p.steps && p.steps.length ? `<ol>${p.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>` : ''}
@@ -154,6 +156,6 @@
       let to; addEventListener('resize', () => { clearTimeout(to); to = setTimeout(run, 200); });
     })();
   </script>
-<script src="game-bar.js?v=3"></script>
+<script src="game-bar.js?v=4"></script>
 </body>
 </html>
