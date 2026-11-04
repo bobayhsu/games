@@ -2836,9 +2836,11 @@ document.getElementById('board').addEventListener('click',function(){
     if(!area||!area.offsetParent||!panel.getBoundingClientRect().width)return;
     var list=els(),base=list.map(function(e){return parseFloat(getComputedStyle(e).fontSize)||16;});
     var st=document.querySelector('#storyarea .stage'),b0=st?parseFloat(getComputedStyle(st).fontSize)||20:20;
-    var touch=window.matchMedia&&matchMedia('(pointer:coarse)').matches, small=Math.min(innerWidth,innerHeight)<=500, maxPx=small?12:(touch?15:64); // 手機最大約 12px；平板、摺疊機等觸控螢幕最大約 15px
-    var lo=(small||touch)?0.35:0.6,hi=Math.max(lo+0.05,Math.min(2.6,maxPx/b0));
-    setK(list,base,lo);if(!fits()){if(!small&&!touch)reset();return;}
+    /* 2026-11-04：故事字和左邊題目字一樣大（放不下才縮小） */
+    var q=document.querySelector('#board .cell:not(.hovering) .q'),qPx=q?parseFloat(getComputedStyle(q).fontSize)||b0:b0;
+    var hi=qPx/b0,lo=Math.min(0.3,hi);
+    setK(list,base,hi);if(fits())return;
+    setK(list,base,lo);if(!fits())return;
     for(var k=0;k<10;k++){var mid=(lo+hi)/2;setK(list,base,mid);if(fits())lo=mid;else hi=mid;}
     setK(list,base,Math.floor(lo*100)/100);
   }finally{busy=false;}}
