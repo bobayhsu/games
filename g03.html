@@ -2823,7 +2823,7 @@ document.getElementById('board').addEventListener('click',function(){
   var panel=document.getElementById('panelMain');if(!panel)return;
   var SEL='#storyarea .stage, #storyarea .tag, #qnum > *';
   function els(){return Array.prototype.slice.call(document.querySelectorAll(SEL));}
-  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});document.querySelectorAll('#storyarea .stage, #storyarea .tag, #qnum .qnum-value').forEach(function(e){e.style.removeProperty('font-family');e.style.removeProperty('font-weight');});var qn=document.getElementById('qnum');if(qn)qn.style.removeProperty('margin-left');var ar=document.getElementById('storyarea');if(ar)ar.style.removeProperty('height');}
+  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});document.querySelectorAll('#storyarea .stage, #storyarea .tag, #qnum .qnum-value').forEach(function(e){e.style.removeProperty('font-family');e.style.removeProperty('font-weight');});var qn=document.getElementById('qnum');if(qn){qn.style.removeProperty('margin-left');qn.style.removeProperty('margin-right');}var ar=document.getElementById('storyarea');if(ar)ar.style.removeProperty('height');}
   function setK(list,base,k){list.forEach(function(e,i){e.style.setProperty('font-size',(base[i]*k).toFixed(2)+'px','important');});}
   function bottomLimit(){var P=panel.getBoundingClientRect(),lim=P.bottom; // 底部圖示蓋住的地方不能放字
     var a=document.querySelector('#gameBar a');if(a&&a.offsetParent)lim=Math.min(lim,a.getBoundingClientRect().top-4);
@@ -2846,7 +2846,7 @@ document.getElementById('board').addEventListener('click',function(){
     if(qs)document.querySelectorAll('#storyarea .stage, #storyarea .tag, #qnum .qnum-value').forEach(function(e){e.style.setProperty('font-family',qs.fontFamily,'important');});
     if(qs)document.querySelectorAll('#storyarea .stage, #storyarea .tag').forEach(function(e){e.style.setProperty('font-weight',qs.fontWeight,'important');});
     /* 標題（例如「費德勒的眼淚」）和故事之間空一行 */
-    var qn=document.getElementById('qnum');if(qn)qn.style.setProperty('margin-left',Math.round(qPx*1.6)+'px','important');
+    var qn=document.getElementById('qnum');if(qn)qn.style.setProperty('margin-left',Math.round(qPx*1.6)+'px','important');if(qn)qn.style.setProperty('margin-right',Math.round(qPx*0.8)+'px','important'); // 標題前面（右邊）空半行
     /* 故事區的高度限制在底部圖示上方：太長的段落會自動折成兩行（直排往左多一行），字不用縮小 */
     var ar=area.getBoundingClientRect(),avail=Math.floor(bottomLimit()-ar.top-6);
     if(avail>60)area.style.setProperty('height',avail+'px','important');
