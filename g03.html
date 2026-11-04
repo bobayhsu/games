@@ -2851,7 +2851,7 @@ document.getElementById('board').addEventListener('click',function(){
     var ar=area.getBoundingClientRect(),avail=Math.floor(bottomLimit()-ar.top-6);
     if(avail>60)area.style.setProperty('height',avail+'px','important');
     var isDesk=!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)&&Math.min(innerWidth,innerHeight)>500;
-    var hi=qPx/b0*(isDesk?1.3:1),lo=hi*0.5; // 桌機：故事字是題目字的 1.3 倍
+    var hi=qPx/b0*(isDesk?1.56:1),lo=hi*0.5; // 桌機：故事字再放大 1.2 倍（1.3×1.2≈1.56 倍題目字）
     setK(list,base,hi);if(fits())return;
     setK(list,base,lo);if(!fits()){setK(list,base,hi);return;}
     for(var k=0;k<10;k++){var mid=(lo+hi)/2;setK(list,base,mid);if(fits())lo=mid;else hi=mid;}
