@@ -2823,12 +2823,16 @@ document.getElementById('board').addEventListener('click',function(){
   var panel=document.getElementById('panelMain');if(!panel)return;
   var SEL='#storyarea .stage, #storyarea .tag, #qnum > *';
   function els(){return Array.prototype.slice.call(document.querySelectorAll(SEL));}
-  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});document.querySelectorAll('#storyarea .stage, #qnum .qnum-value').forEach(function(e){e.style.removeProperty('font-family');e.style.removeProperty('font-weight');});var qn=document.getElementById('qnum');if(qn)qn.style.removeProperty('margin-left');}
+  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});document.querySelectorAll('#storyarea .stage, #storyarea .tag, #qnum .qnum-value').forEach(function(e){e.style.removeProperty('font-family');e.style.removeProperty('font-weight');});var qn=document.getElementById('qnum');if(qn)qn.style.removeProperty('margin-left');var ar=document.getElementById('storyarea');if(ar)ar.style.removeProperty('height');}
   function setK(list,base,k){list.forEach(function(e,i){e.style.setProperty('font-size',(base[i]*k).toFixed(2)+'px','important');});}
-  function fits(){var P=panel.getBoundingClientRect(),ok=true; // 只看三段故事文字有沒有超出欄位的左邊或下緣
+  function bottomLimit(){var P=panel.getBoundingClientRect(),lim=P.bottom; // 底部圖示蓋住的地方不能放字
+    var a=document.querySelector('#gameBar a');if(a&&a.offsetParent)lim=Math.min(lim,a.getBoundingClientRect().top-4);
+    else if(window.self!==window.top){try{var f=window.frameElement,pd=f&&f.ownerDocument,bt=pd&&pd.querySelector('#syncBottomBar button');if(bt){var fr=f.getBoundingClientRect(),br=bt.getBoundingClientRect();if(br.height)lim=Math.min(lim,br.top-fr.top-4);}}catch(_){}}
+    return lim;}
+  function fits(){var P=panel.getBoundingClientRect(),B=bottomLimit(),ok=true; // 只看三段故事文字有沒有超出欄位的左邊或下緣
     document.querySelectorAll('#storyarea .stage').forEach(function(e){if(!ok||!e.offsetParent)return;
       var rg=document.createRange();rg.selectNodeContents(e);var r=rg.getBoundingClientRect();if(!r.width&&!r.height)return;
-      if(r.left<P.left-2||r.bottom>P.bottom-4)ok=false;});
+      if(r.left<P.left-2||r.bottom>Math.min(P.bottom-4,B))ok=false;});
     return ok;}
   var busy=false;
   function fit(){if(busy)return;busy=true;try{
@@ -2836,12 +2840,16 @@ document.getElementById('board').addEventListener('click',function(){
     if(!area||!area.offsetParent||!panel.getBoundingClientRect().width)return;
     var list=els(),base=list.map(function(e){return parseFloat(getComputedStyle(e).fontSize)||16;});
     var st=document.querySelector('#storyarea .stage'),b0=st?parseFloat(getComputedStyle(st).fontSize)||20:20;
+    list.forEach(function(e,i){if(e.classList&&e.classList.contains('tag'))base[i]=b0;}); // 原以為、沒想到、最後：和故事字一樣大
     /* 2026-11-04：故事字和左邊題目字「字體、粗細、大小」都一樣（真的放不下才稍微縮小，最多縮到一半） */
     var q=document.querySelector('#board .cell:not(.hovering) .q'),qs=q?getComputedStyle(q):null,qPx=qs?parseFloat(qs.fontSize)||b0:b0;
-    if(qs)document.querySelectorAll('#storyarea .stage, #qnum .qnum-value').forEach(function(e){e.style.setProperty('font-family',qs.fontFamily,'important');});
-    if(qs)document.querySelectorAll('#storyarea .stage').forEach(function(e){e.style.setProperty('font-weight',qs.fontWeight,'important');});
+    if(qs)document.querySelectorAll('#storyarea .stage, #storyarea .tag, #qnum .qnum-value').forEach(function(e){e.style.setProperty('font-family',qs.fontFamily,'important');});
+    if(qs)document.querySelectorAll('#storyarea .stage, #storyarea .tag').forEach(function(e){e.style.setProperty('font-weight',qs.fontWeight,'important');});
     /* 標題（例如「費德勒的眼淚」）和故事之間空一行 */
     var qn=document.getElementById('qnum');if(qn)qn.style.setProperty('margin-left',Math.round(qPx*1.6)+'px','important');
+    /* 故事區的高度限制在底部圖示上方：太長的段落會自動折成兩行（直排往左多一行），字不用縮小 */
+    var ar=area.getBoundingClientRect(),avail=Math.floor(bottomLimit()-ar.top-6);
+    if(avail>60)area.style.setProperty('height',avail+'px','important');
     var hi=qPx/b0,lo=hi*0.5;
     setK(list,base,hi);if(fits())return;
     setK(list,base,lo);if(!fits()){setK(list,base,hi);return;}
@@ -2864,6 +2872,13 @@ document.getElementById('board').addEventListener('click',function(){
 .layout:not(.board-collapsed):not(.panel-collapsed) #panel{flex:0 0 33.333%!important;width:33.333%!important;max-width:none!important;min-width:0!important;height:auto!important}
 }
 </style>
+<style id="phone-size-202611">
+/* 2026-11-04：手機（觸控或小螢幕）直拿、橫拿，題目字大小都一樣：依螢幕短邊計算，不受方向影響 */
+@media (pointer:coarse),(max-width:700px),(max-height:500px){
+#board .cell .q,#board .cell.selected .q,#board .cell.lit .q,#board .cell.win .q,#board.dim-active .cell.hovering .q{font-size:var(--pfs,clamp(11px,3.2vmin,15px))!important;line-height:1.3!important}
+}
+</style>
+<script>/* 依「螢幕」短邊（不是視窗），直拿橫拿算出來都一樣 */(function(){var w=screen.width||innerWidth,h=screen.height||innerHeight,m=Math.min(w,h);document.documentElement.style.setProperty('--pfs',Math.max(11,Math.min(15,m*0.032)).toFixed(1)+'px');})();</script>
 <script src="game-bar.js?v=6"></script>
 </body>
 </html>
