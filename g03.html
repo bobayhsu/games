@@ -2823,12 +2823,12 @@ document.getElementById('board').addEventListener('click',function(){
   var panel=document.getElementById('panelMain');if(!panel)return;
   var SEL='#storyarea .stage, #storyarea .tag, #qnum > *';
   function els(){return Array.prototype.slice.call(document.querySelectorAll(SEL));}
-  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});}
+  function reset(){els().forEach(function(e){e.style.removeProperty('font-size');});document.querySelectorAll('#storyarea .stage, #qnum .qnum-value').forEach(function(e){e.style.removeProperty('font-family');e.style.removeProperty('font-weight');});}
   function setK(list,base,k){list.forEach(function(e,i){e.style.setProperty('font-size',(base[i]*k).toFixed(2)+'px','important');});}
-  function fits(){var P=panel.getBoundingClientRect(),ok=true;
-    document.querySelectorAll('#storyarea .stage, #qnum > *').forEach(function(e){if(!ok||!e.offsetParent)return;
+  function fits(){var P=panel.getBoundingClientRect(),ok=true; // 只看三段故事文字有沒有超出欄位的左邊或下緣
+    document.querySelectorAll('#storyarea .stage').forEach(function(e){if(!ok||!e.offsetParent)return;
       var rg=document.createRange();rg.selectNodeContents(e);var r=rg.getBoundingClientRect();if(!r.width&&!r.height)return;
-      if(r.left<P.left-1||r.right>P.right+1||r.top<P.top-1||r.bottom>P.bottom-4)ok=false;});
+      if(r.left<P.left-2||r.bottom>P.bottom-4)ok=false;});
     return ok;}
   var busy=false;
   function fit(){if(busy)return;busy=true;try{
@@ -2836,11 +2836,13 @@ document.getElementById('board').addEventListener('click',function(){
     if(!area||!area.offsetParent||!panel.getBoundingClientRect().width)return;
     var list=els(),base=list.map(function(e){return parseFloat(getComputedStyle(e).fontSize)||16;});
     var st=document.querySelector('#storyarea .stage'),b0=st?parseFloat(getComputedStyle(st).fontSize)||20:20;
-    /* 2026-11-04：故事字和左邊題目字一樣大（放不下才縮小） */
-    var q=document.querySelector('#board .cell:not(.hovering) .q'),qPx=q?parseFloat(getComputedStyle(q).fontSize)||b0:b0;
-    var hi=qPx/b0,lo=Math.min(0.3,hi);
+    /* 2026-11-04：故事字和左邊題目字「字體、粗細、大小」都一樣（真的放不下才稍微縮小，最多縮到一半） */
+    var q=document.querySelector('#board .cell:not(.hovering) .q'),qs=q?getComputedStyle(q):null,qPx=qs?parseFloat(qs.fontSize)||b0:b0;
+    if(qs)document.querySelectorAll('#storyarea .stage, #qnum .qnum-value').forEach(function(e){e.style.setProperty('font-family',qs.fontFamily,'important');});
+    if(qs)document.querySelectorAll('#storyarea .stage').forEach(function(e){e.style.setProperty('font-weight',qs.fontWeight,'important');});
+    var hi=qPx/b0,lo=hi*0.5;
     setK(list,base,hi);if(fits())return;
-    setK(list,base,lo);if(!fits())return;
+    setK(list,base,lo);if(!fits()){setK(list,base,hi);return;}
     for(var k=0;k<10;k++){var mid=(lo+hi)/2;setK(list,base,mid);if(fits())lo=mid;else hi=mid;}
     setK(list,base,Math.floor(lo*100)/100);
   }finally{busy=false;}}
