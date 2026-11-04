@@ -2850,7 +2850,8 @@ document.getElementById('board').addEventListener('click',function(){
     /* 故事區的高度限制在底部圖示上方：太長的段落會自動折成兩行（直排往左多一行），字不用縮小 */
     var ar=area.getBoundingClientRect(),avail=Math.floor(bottomLimit()-ar.top-6);
     if(avail>60)area.style.setProperty('height',avail+'px','important');
-    var hi=qPx/b0,lo=hi*0.5;
+    var isDesk=!(window.matchMedia&&matchMedia('(pointer:coarse)').matches)&&Math.min(innerWidth,innerHeight)>500;
+    var hi=qPx/b0*(isDesk?1.3:1),lo=hi*0.5; // 桌機：故事字是題目字的 1.3 倍
     setK(list,base,hi);if(fits())return;
     setK(list,base,lo);if(!fits()){setK(list,base,hi);return;}
     for(var k=0;k<10;k++){var mid=(lo+hi)/2;setK(list,base,mid);if(fits())lo=mid;else hi=mid;}
