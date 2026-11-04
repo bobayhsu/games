@@ -31,13 +31,18 @@ function gameSync(){
   if(!qs.has('sync')||!P.firebase||!P.firebase.database)return;
   const room=qs.get('sync')||'demo';if(!/^[A-Za-z0-9_-]{4,60}$/.test(room))return;
   const ref=P.firebase.database().ref('rooms/'+room+'/screen/gameCmd');
+  /* 狀態提示：左上角小標籤。連上顯示「遊戲同步 ✓」幾秒後淡出；寫入或讀取失敗會一直顯示紅色，方便判斷問題 */
+  const tag=document.createElement('div');tag.id='gameSyncTag';
+  tag.style.cssText='position:fixed;left:8px;top:8px;z-index:2147483647;padding:4px 10px;border-radius:12px;font:700 12px "Noto Sans TC",sans-serif;color:#fff;background:#1f7a4d;opacity:.92;pointer-events:none;transition:opacity .6s';
+  const say=(t,bad)=>{tag.textContent=t;tag.style.background=bad?'#c41f27':'#1f7a4d';tag.style.opacity='.92';clearTimeout(tag._h);if(!bad)tag._h=setTimeout(()=>{tag.style.opacity='0';},2500);};
+  (document.body?Promise.resolve():new Promise(r=>addEventListener('DOMContentLoaded',r))).then(()=>{document.body.appendChild(tag);say('遊戲同步 ✓ '+room);});
   const node='g-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
   const page=location.pathname.split('/').pop()||'index.html';
   const isBingo=!!document.querySelector('.board .tile .tile-number')&&typeof window.updateStatus==='function';
   let seq=0,first=true,lastId='';
   const pathOf=el=>{const p=[];while(el&&el!==document.body){const par=el.parentElement;if(!par)return null;p.unshift([...par.children].indexOf(el));el=par;}return el===document.body?p:null;};
   const byPath=p=>{let el=document.body;for(const i of p||[]){el=el&&el.children[i];}return el||null;};
-  const send=(kind,extra)=>{ref.set(Object.assign({id:node+'-'+(++seq),source:node,page,kind,at:P.firebase.database.ServerValue.TIMESTAMP},extra)).catch(e=>console.warn('[遊戲同步] 寫入失敗',e));};
+  const send=(kind,extra)=>{ref.set(Object.assign({id:node+'-'+(++seq),source:node,page,kind,at:P.firebase.database.ServerValue.TIMESTAMP},extra)).catch(e=>{console.warn('[遊戲同步] 寫入失敗',e);say('遊戲同步失敗：無法寫入（'+(e&&e.code||e&&e.message||'錯誤')+'）',true);});};
   const bingoState=()=>{const t=[...document.querySelectorAll('.board .tile')];return{nums:t.map(x=>x.dataset.number||''),sel:t.map((x,i)=>x.classList.contains('selected')?i:-1).filter(i=>i>=0),latest:t.findIndex(x=>x.classList.contains('latest'))};};
   const applyBingo=st=>{const t=[...document.querySelectorAll('.board .tile')];if(!st||!Array.isArray(st.nums)||st.nums.length!==t.length)return;
     t.forEach((x,i)=>{const n=st.nums[i];x.dataset.number=n;const l=x.querySelector('.tile-number');if(l)l.textContent=n;x.setAttribute('aria-label','標記 '+n);
@@ -54,13 +59,14 @@ function gameSync(){
   ref.on('value',snap=>{const c=snap.val();if(first){first=false;return;}
     if(!c||c.source===node||c.id===lastId||c.page!==page)return;lastId=c.id;
     try{
+      say('遊戲同步 ✓ 收到另一台的操作');
       if(c.kind==='state'&&isBingo){applyBingo(c.state);return;}
       const el=byPath(c.path);if(!el)return;
       if(c.kind==='click')el.click();
       else if(c.kind==='input'){el.value=c.value;el.dispatchEvent(new Event('input',{bubbles:true}));}
       else if(c.kind==='submit'&&el.requestSubmit)el.requestSubmit();
     }catch(err){console.warn('[遊戲同步] 套用失敗',err);}
-  },err=>console.warn('[遊戲同步] 讀取失敗',err));
+  },err=>{console.warn('[遊戲同步] 讀取失敗',err);say('遊戲同步失敗：無法讀取（'+(err&&err.code||'錯誤')+'）',true);});
   addEventListener('pagehide',()=>{try{ref.off();}catch(_){}});
 }
 const mk=(key,title,href,color,onClick)=>{const a=document.createElement('a');a.href=href;a.title=title;a.setAttribute('aria-label',title);
