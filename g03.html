@@ -144,7 +144,7 @@ function fitBoard(){const c=cells[0];if(!c||!c.clientWidth)return;
   const v=biggest(9,Math.max(10,hi),px=>{board.style.setProperty('--qfs',px+'px');return cells.every(x=>{const q=x.firstChild;return q.scrollHeight<=x.clientHeight-px*1.0&&q.scrollWidth<=x.clientWidth;});});
   board.style.setProperty('--qfs',v+'px');}
 function fitCard(){if(!wrap.classList.contains('open'))return;
-  const r=card.getBoundingClientRect();card.classList.toggle('vert',r.width>r.height*1.15);
+  card.classList.remove('vert'); /* 2026-11-04：故事一律橫排 */
   const qfs=parseFloat(getComputedStyle(board).getPropertyValue('--qfs'))||16;
   const hi=Math.min(Math.max(qfs*2.2,28),120);
   const v=biggest(10,hi,px=>{body.style.setProperty('--cfs',px+'px');return body.scrollHeight<=body.clientHeight+1&&body.scrollWidth<=body.clientWidth+1;});

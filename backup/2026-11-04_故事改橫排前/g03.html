@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>故事賓果｜16 道人生求救題</title>
+<style>
+/* 故事賓果 新版型（2026-11-04）
+   平常：16 題佔滿畫面。點一題：故事以大卡片蓋在上面，按 ✕ 或點空白處回到題板。
+   字的大小只有一套規則：程式量好格子和卡片的大小，自動放到「剛好塞滿、不超出」。 */
+:root{--ink:#1E1C1A;--muted:#8A8478;--accent:#C41F27;--paper:#F7F5F1;--card:#FFFFFF;--lit:#FDECEC;--gold:#F2C94C;--win:#1F7A4D;--reserve:84px}
+@media (max-width:520px),(max-height:500px){:root{--reserve:64px}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:"Microsoft JhengHei","Noto Sans TC","PingFang TC",sans-serif;-webkit-text-size-adjust:100%}
+body.locked .app{visibility:hidden}
+
+/* ---------- 密碼門 ---------- */
+#gate{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at center,#1b1b1b,#050505);padding:16px}
+#gate.hidden{display:none}
+#gate form{width:min(720px,100%);background:#111;border:1px solid #333;border-radius:16px;padding:clamp(16px,4vw,36px);color:#fff;text-align:center}
+#gate h2{margin:0 0 6px;color:#F2C94C;font-size:clamp(26px,5vw,44px)}
+#gate p{margin:0 0 18px;color:#bbb;font-size:clamp(14px,2.2vw,18px)}
+#gate .pics{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,2vw,18px);margin-bottom:18px}
+#gate .pics img{width:100%;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:10px}
+#gate .row{display:flex;gap:10px}
+#gate input{flex:1;min-width:0;font-size:24px;padding:10px 14px;border-radius:10px;border:3px solid #F2C94C;text-align:center;letter-spacing:.3em}
+#gate button{font:900 20px inherit;padding:0 22px;border:0;border-radius:10px;background:#F2C94C;color:#111;cursor:pointer}
+#gateErr{min-height:1.4em;margin-top:10px;color:#ff8a8a;font-weight:700}
+
+/* ---------- 題板 ---------- */
+.app{position:fixed;left:0;right:0;top:0;bottom:var(--reserve);display:flex;flex-direction:column;padding:10px 10px 6px}
+.top{flex:none;display:flex;align-items:center;gap:12px;padding:0 4px 8px}
+.top h1{margin:0;font-size:clamp(18px,2.4vw,30px);letter-spacing:.06em}
+/* 在簡報的同步視窗裡：左上角有「同步已連線」標籤、右上角有返回故事鈕，標題列避開這兩個角落 */
+html.inframe .top{padding-left:clamp(150px,16vw,230px);padding-right:clamp(56px,5vw,72px)}
+html.inframe #cardClose{display:none}
+html:not(.inframe) #cardBack{display:none}
+.top .sub{color:var(--muted);font-weight:700;font-size:clamp(12px,1.4vw,16px)}
+#status{margin-left:auto;font-weight:900;color:var(--win);font-size:clamp(14px,1.8vw,22px)}
+#reset{flex:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.2)}
+#board{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:clamp(5px,0.9vw,12px)}
+.cell{position:relative;min-width:0;min-height:0;overflow:hidden;border:2px solid #E6E0D4;border-radius:clamp(8px,1vw,14px);background:var(--card);color:var(--ink);text-align:left;padding:.45em .55em 1.1em;cursor:pointer;font:inherit;font-size:var(--qfs,16px);font-weight:700;line-height:1.3;display:flex;align-items:center;box-shadow:0 2px 6px rgba(60,45,20,.08);transition:transform .12s,border-color .12s,background .12s}
+.cell:hover{border-color:var(--accent);transform:translateY(-2px)}
+.cell .q{display:block;width:100%;word-break:break-all}
+.cell .num{position:absolute;right:.5em;bottom:.3em;font-size:.6em;color:var(--muted);font-weight:700}
+.cell.lit{background:var(--lit);border-color:#E9A3A6;color:var(--accent)}
+.cell.win{background:#E3F4EA;border-color:var(--win);color:var(--win);animation:glow 1.2s ease-in-out infinite alternate}
+@keyframes glow{to{box-shadow:0 0 0 4px rgba(31,122,77,.25)}}
+
+/* ---------- 故事大卡片 ---------- */
+#cardWrap{position:fixed;left:0;right:0;top:0;bottom:var(--reserve);z-index:20;display:none;align-items:center;justify-content:center;padding:clamp(8px,2vw,28px);background:rgba(20,18,16,.55)}
+#cardWrap.open{display:flex}
+#card{position:relative;width:100%;height:100%;max-width:1500px;background:#0B0B0B;color:#fff;border-radius:clamp(12px,1.6vw,22px);box-shadow:0 20px 60px rgba(0,0,0,.45);overflow:hidden;display:flex;flex-direction:column}
+#cardBody{flex:1;min-height:0;padding:clamp(14px,3vw,48px) clamp(16px,3.5vw,60px);font-size:var(--cfs,24px);line-height:1.55;font-weight:700;overflow:hidden}
+#cardBody .ask{color:#C9C3B8;font-size:.62em;font-weight:700;margin:0 0 .5em}
+#cardBody .title{font-size:1.45em;font-weight:900;margin:0 0 .6em;letter-spacing:.04em}
+#cardBody .part{margin:0 0 .55em}
+#cardBody .tag{display:inline-block;background:var(--gold);color:#111;border-radius:.25em;padding:0 .25em;margin-right:.35em}
+#cardBody .outline{white-space:pre-line;font-weight:600}
+/* 卡片比較寬（桌機、手機橫拿）時改成直排，由右往左讀 */
+#card.vert #cardBody{writing-mode:vertical-rl;text-orientation:upright;padding-top:clamp(56px,6vw,72px)}
+#card.vert #cardBody .n{text-combine-upright:all}
+#card:not(.vert) #cardBody .ask{padding-right:52px}
+#card.vert #cardBody .ask{margin:0 0 0 .5em}
+#card.vert #cardBody .title{margin:0 0 0 .7em}
+#card.vert #cardBody .part{margin:0 0 0 .7em}
+#card.vert #cardBody .tag{margin:0 0 .35em 0;padding:.25em 0}
+#cardBar{flex:none;display:flex;gap:10px;justify-content:center;align-items:center;padding:8px 12px;border-top:1px solid #222}
+#cardBar button{font:800 clamp(15px,1.6vw,22px) inherit;padding:10px 18px;border-radius:999px;border:1px solid #444;background:#1a1a1a;color:#eee;cursor:pointer}
+#cardBar button:hover{background:#2a2a2a}
+#cardClose{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#111;font-size:24px;font-weight:900;cursor:pointer;z-index:2}
+</style>
+</head>
+<body class="locked">
+<script>try{if(window.self!==window.top)document.documentElement.classList.add('inframe');}catch(_){document.documentElement.classList.add('inframe');}</script>
+<div id="gate">
+  <form id="gateForm" autocomplete="off">
+    <h2>故事賓果</h2>
+    <p>觀察三張火柴人，輸入三位數密碼</p>
+    <div class="pics"><img src="assets/stickman-1.png" alt="火柴人謎題圖一"><img src="assets/stickman-4.png" alt="火柴人謎題圖二"><img src="assets/stickman-6.png" alt="火柴人謎題圖三"></div>
+    <div class="row"><input id="gateInput" type="password" inputmode="numeric" maxlength="3" aria-label="三位數密碼"><button type="submit">進入</button></div>
+    <div id="gateErr" aria-live="polite"></div>
+  </form>
+</div>
+
+<div class="app">
+  <div class="top">
+    <button id="reset" type="button" title="重新開始" aria-label="重新開始">↻</button>
+    <h1>故事賓果</h1><span class="sub">16 道人生求救題</span>
+    <span id="status"></span>
+  </div>
+  <div id="board"></div>
+</div>
+
+<div id="cardWrap">
+  <div id="card" role="dialog" aria-modal="true" aria-labelledby="cardTitle">
+    <button id="cardClose" type="button" title="回到題板" aria-label="回到題板">✕</button>
+    <div id="cardBody"></div>
+    <div id="cardBar">
+      <button id="cardBack" type="button">✕ 回到題板</button>
+      <button id="cardMode" type="button">看完整故事</button>
+      <button id="cardUnmark" type="button">取消這一格</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const Q=["我好像什麼都做不好，怎麼辦？", "認輸，是不是很丟臉？", "我不知道自己喜歡什麼，怎麼辦？", "穩定和夢想，該選哪一個？", "大家都反對我的決定，我該堅持嗎？", "現在轉行、重來，會不會太遲了？", "選錯了怎麼辦？", "為什麼我這個年紀了，還是不知道要做什麼？", "我走不出來，怎麼辦？", "為什麼是我？我做錯了什麼？", "要怎麼原諒傷害過我的人？", "難過的時候，可以哭嗎？男生也可以嗎？", "我是不是想太多？", "假裝沒事久了，會不會就真的沒事了？", "爸媽根本不懂我，要怎麼跟他們溝通？", "為什麼大人可以，小孩就不行？"];
+const S=["被刷掉的喬丹", "田忌賽馬", "愛麗絲與柴郡貓", "梵谷的畫筆", "萊特兄弟的飛機", "摩西奶奶的畫", "便利貼的誕生", "肯德基爺爺", "海倫凱勒的水", "尼克胡哲的擁抱", "曼德拉走出監獄", "費德勒的眼淚", "達文西的筆記本", "皇帝的新衣", "尼莫與爸爸", "小王子與大人"];
+const T=[["他以為自己連校隊都進不了，就是沒有天分。", "被刷掉後，他把難過變成每天更早、更久的練習。", "後來大家記住的，不是落選的人，而是籃球之神。"], ["田忌照原本配法賽馬，一定會輸。", "孫臏讓他先輸一局，換來後面兩局的勝利。", "認輸不是丟臉，有時是看清全局的策略。"], ["愛麗絲站在岔路口，急著問哪條路才對。", "柴郡貓問她想去哪裡，她卻答不出來。", "不知道喜歡什麼時，先開始走，答案會在路上出現。"], ["梵谷也曾想走安穩的路，卻一次次失敗。", "他後來拿起畫筆，日子仍不穩，心卻有了方向。", "夢想不是逃離現實，而是願意為某件事承擔。"], ["大家笑萊特兄弟，覺得人不可能飛上天。", "他們一次次試飛、摔壞、修正，還是沒有停下。", "反對聲不一定代表你錯，有時只是別人還沒看見。"], ["她年紀大了，手也不方便，像是只能放下新開始。", "摩西奶奶七十多歲才認真畫畫，慢慢被世界看見。", "重來不怕晚，怕的是你以為晚了就不能開始。"], ["科學家原本想做強力膠，卻做出黏不牢的膠水。", "同事換個角度，把失敗拿來做可撕下的書籤。", "選錯不一定全毀，有時只是用途還沒被找到。"], ["他到了退休年紀，仍不知道人生下一步在哪裡。", "肯德基爺爺拿著炸雞配方到處被拒絕。", "年紀不是答案的期限，人生也能很晚才開張。"], ["海倫看不見、聽不見，像被困在黑暗裡。", "老師安妮一次次陪她，把水這個字放進她心裡。", "走不出來時，先抓住一個願意陪你的人和一個小出口。"], ["尼克一出生就沒有四肢，曾以為自己是不是被世界放棄。", "他慢慢學會生活，也把自己的痛講給別人聽。", "不是你做錯什麼，有些痛不是懲罰，而是生命要你長出別種力量。"], ["曼德拉被關進監獄二十七年，理由充滿不公平。", "出獄後，他沒有把國家帶向報復，而是選擇和解。", "原諒不是說傷害沒發生，而是不再讓傷害掌控自己。"], ["有人以為男生和冠軍都應該永遠冷靜。", "費德勒贏球會哭，輸球也會哭，情緒很真實。", "眼淚不是軟弱，是心真的在乎，也是在釋放。"], ["旁人看達文西，可能覺得他整天想東想西。", "他把問題、觀察、設計全寫進筆記本。", "想太多不一定壞，學會整理，它就會變成創造力。"], ["全城的人都看見皇帝沒穿衣服，卻假裝沒事。", "大家越裝越安靜，直到孩子說出真話。", "假裝沒事不會讓破洞消失，只會讓真話更難出口。"], ["尼莫覺得爸爸只會管他，爸爸也覺得孩子太不懂危險。", "分開後，他們才看見彼此心裡其實都是害怕和愛。", "溝通不是誰贏，而是把責備翻譯成真正的擔心。"], ["小王子遇見許多大人，發現他們常把規矩看得比心重要。", "他沒有只是抱怨，而是繼續用自己的眼睛理解世界。", "大人可以不代表一定對，小孩不行也不代表沒有道理。"]];
+const O=["喬丹年輕時曾因表現不夠好，連高中校隊都沒選上。那次被淘汰讓他非常難過，回家後甚至哭了出來。\n但他沒有因此放棄，反而把挫敗變成訓練的力量，天天更早到球場、練得更久、更專注。\n後來，那個曾經被刷掉的男孩，成了籃球之神。這個故事告訴我們，覺得自己什麼都做不好，不一定表示你沒有天分，而是你還在一段需要累積、需要打磨的路上。", "田忌與齊王賽馬，照原本的配法一定會輸。\n孫臏卻建議他故意用下等馬去對齊王的上等馬，先輸掉第一局，再用上等馬去贏中等馬，用中等馬去贏下等馬，最後反而拿下整場勝利。\n這個故事提醒我們，認輸不一定是丟臉，有時它只是策略的一部分。真正重要的不是每一局都要贏，而是你有沒有看清全局，知道什麼時候該退一步，換來最後的勝利。", "愛麗絲走到岔路口，不知道該往哪裡去，於是問柴郡貓哪條路才對。貓反問她想去什麼地方，愛麗絲說自己其實也不知道。\n貓便回答，如果你不知道要去哪裡，那麼走哪一條路其實都差不多。\n這句話讓愛麗絲明白，真正困住人的，常常不是選項太多，而是不知道自己想成為什麼樣的人。當你不知道喜歡什麼時，與其一直停著，不如先開始走，答案會在路上慢慢出現。", "梵谷曾經做過畫商、教師、傳教士，卻在許多穩定道路上走得跌跌撞撞。後來他選擇畫畫，生活並沒有立刻變好，甚至常常貧窮、孤單、不被理解。\n可是他仍把心裡看見的星空、麥田與人，努力畫下來。\n這個故事不是叫人不顧現實，而是提醒我們，穩定和夢想不一定只是二選一。真正的夢想不是逃走，而是你願意慢慢把它變成能承擔的生活。", "萊特兄弟想讓人類飛上天空時，許多人覺得那只是荒唐的幻想。當時沒有豪華實驗室，也沒有很多人相信他們。\n他們一邊修腳踏車，一邊研究風、翅膀和引擎，一次又一次試飛、失敗、摔壞、修正。\n最後，飛機真的離開地面。這個故事提醒我們，大家反對不一定表示你錯，也可能只是他們還沒看見你看見的畫面。但堅持不是硬撐，而是願意用行動證明。", "摩西奶奶年輕時忙著工作、結婚、照顧家庭，畫畫一直不是她人生的主角。年紀大了以後，她因為手指不方便，不能再做原本喜歡的刺繡，才開始認真畫畫。\n她已經七十多歲，卻一筆一筆畫出鄉村生活，後來成為美國知名畫家。\n這個故事告訴我們，轉行、重來，不一定有標準年齡。太遲常常不是時間說的，而是恐懼說的。只要還能開始，就還有新的路。", "有位科學家原本想發明強力膠，結果卻做出一種黏性不夠強、一下就能撕下來的膠水，看起來像是一次徹底失敗。\n可是另一位同事忽然想到，這種膠正好可以用來做書籤，貼上去不會掉，撕下來也不傷紙。\n後來，這個失敗的發明竟變成全世界都在用的便利貼。人生的選擇也是如此，走錯了、做歪了，不一定全盤作廢，有時只是還沒找到它真正該去的地方。", "桑德斯上校，也就是後來的肯德基爺爺，年輕時換過許多工作，當過農場工人、售票員、加油站經營者，也經歷過不少失敗。\n到了很多人準備退休的年紀，他仍帶著炸雞配方四處拜訪餐廳，被拒絕很多次後，才慢慢找到機會。\n這個故事提醒我們，不知道要做什麼不代表你的人生落後。有些人的方向很早出現，有些人則是在走過很多彎路後，才把經驗煮成自己的味道。", "海倫凱勒小時候因病失去視力與聽力，像被困在沒有聲音也沒有光的世界裡。她急躁、憤怒，也說不出心裡的需要。\n老師安妮來到她身邊，一次次陪她練習，直到有一天在水流旁，海倫突然明白手心裡的符號代表水。\n從那一刻開始，世界慢慢打開。這個故事告訴我們，走不出來時，不一定要立刻走很遠。先抓住一個字、一個人、一個小出口，光就可能慢慢進來。", "尼克胡哲一出生就沒有四肢，從小面對許多不方便，也曾深深懷疑為什麼是自己，甚至覺得生命沒有希望。\n可是後來，他慢慢學會用自己的方式生活，也開始到世界各地演講，把痛苦、掙扎與勇氣分享給別人。\n這個故事不是說痛苦很好，而是說痛苦不等於你做錯了什麼。有些遭遇沒有簡單答案，但人仍可能在破碎之處長出力量，甚至成為別人的安慰。", "曼德拉因反對種族隔離制度，被關進監獄二十七年。那是一段漫長而不公平的歲月，他失去自由，也錯過許多人生時刻。\n可是當他終於走出監獄，後來成為南非總統時，他沒有把國家推向報復，而是努力推動和解。\n這個故事提醒我們，原諒不是替傷害找藉口，也不是說事情沒有發生。原諒更像是把自己的心從仇恨裡慢慢拿回來，不再讓傷害你的人繼續控制你的人生。", "費德勒在球場上不只輸球會哭，贏球時也常激動落淚。\n有人以為男生、冠軍、世界級選手就該永遠堅強冷靜，但他卻讓大家看見，真正成熟的人不是沒有情緒，而是願意真實面對情緒。\n他的眼淚沒有讓人看不起他，反而讓更多人感受到他的真誠與投入。這個故事提醒我們，難過時可以哭，男生也可以哭；眼淚不是軟弱，而是一種誠實，也是一種釋放。", "達文西總是對世界充滿好奇，腦中不停冒出各種問題與想像，於是他把那些念頭、觀察與設計，全都一筆一筆寫進筆記本裡。\n旁人看來，那像是愛胡思亂想、想太多；可多年之後，人們才發現，那些密密麻麻的筆記竟保存了他驚人的創造力，也讓後世一直研究不完。\n這個故事告訴我們，想得多未必是壞事，關鍵不是把念頭壓下去，而是學會整理它、使用它，讓想法變成作品。", "皇帝的新衣裡，騙子說只有聰明人才看得見那件衣服。大臣們明明什麼都沒看見，卻害怕被說愚笨，只好假裝看見。\n遊行時，城裡的人也跟著假裝，直到一個孩子說出真話，皇帝根本沒有穿衣服。\n這個故事提醒我們，假裝沒事不會讓事情真的沒事，只會讓心裡的真相越來越難說出口。難過、受傷、害怕，都需要被看見，而不是被一層又一層的沒事蓋住。", "尼莫覺得爸爸馬林太愛管他，什麼都不讓他試；馬林則覺得外面的世界太危險，孩子根本不懂。父子吵架後，尼莫被帶離家，馬林展開一段漫長的尋找。\n在旅途中，爸爸學會放手，尼莫也看見爸爸的擔心其實來自愛。\n這個故事提醒我們，爸媽不懂你時，背後常藏著他們的害怕；你覺得被控制時，心裡也有想被信任的需要。溝通不是吵贏，而是把責備翻成真正的感受。", "小王子旅行時遇見許多大人，有人只在乎權力，有人只在乎數字，有人忙著證明自己重要。小王子不懂，為什麼大人總把規矩、面子和所有權看得那麼重。\n可是他沒有只是生氣，而是繼續觀察、提問，用自己的眼睛理解世界。\n這個故事提醒我們，大人可以做，不代表一定比較有道理；小孩不可以做，也不代表你的想法沒有價值。真正重要的是你能不能說出原因，也學會承擔選擇的後果。"];
+const LINES=[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15],[0,5,10,15],[3,6,9,12]];
+let lit=Array(16).fill(false),cur=-1,full=false;
+const $=id=>document.getElementById(id);
+const board=$('board'),wrap=$('cardWrap'),card=$('card'),body=$('cardBody');
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* 題板：16 格固定在 HTML 裡，同步時兩台的位置一定一樣 */
+board.innerHTML=Q.map((q,i)=>'<button class="cell" type="button" data-i="'+i+'"><span class="q">'+esc(q)+'</span><span class="num">'+(i+1)+'</span></button>').join('');
+const cells=[...board.children];
+function winLine(){return LINES.find(l=>l.every(i=>lit[i]))||null;}
+function paint(){const w=winLine();cells.forEach((c,i)=>{c.classList.toggle('lit',lit[i]&&!(w&&w.includes(i)));c.classList.toggle('win',!!(w&&w.includes(i)));});$('status').textContent=w?'賓果！':'';}
+board.addEventListener('click',e=>{const c=e.target.closest('.cell');if(!c)return;const i=+c.dataset.i;lit[i]=true;paint();openCard(i);});
+$('reset').addEventListener('click',()=>{lit.fill(false);closeCard();paint();});
+
+/* 故事卡片 */
+function renderCard(){const i=cur;if(i<0)return;
+  body.innerHTML='<p class="ask">第<span class="n">'+(i+1)+'</span>題｜'+esc(Q[i])+'</p><h2 class="title" id="cardTitle">'+esc(S[i])+'</h2>'+
+    (full?'<p class="part outline">'+esc(O[i]||'')+'</p>':
+    '<p class="part"><span class="tag">原以為</span>'+esc(T[i][0])+'</p><p class="part"><span class="tag">沒想到</span>'+esc(T[i][1])+'</p><p class="part"><span class="tag">最後</span>'+esc(T[i][2])+'</p>');
+  $('cardMode').textContent=full?'看三段重點':'看完整故事';fitCard();}
+function openCard(i){cur=i;full=false;wrap.classList.add('open');renderCard();}
+function closeCard(){cur=-1;wrap.classList.remove('open');}
+$('cardClose').addEventListener('click',closeCard);$('cardBack').addEventListener('click',closeCard);
+wrap.addEventListener('click',e=>{if(e.target===wrap)closeCard();});
+$('cardMode').addEventListener('click',()=>{full=!full;renderCard();});
+$('cardUnmark').addEventListener('click',()=>{if(cur>=0){lit[cur]=false;paint();}closeCard();});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&wrap.classList.contains('open'))closeCard();});
+
+/* ---------- 字級：一套規則，量好再放 ---------- */
+function biggest(lo,hi,ok){for(let k=0;k<14;k++){const m=(lo+hi)/2;if(ok(m))lo=m;else hi=m;}return Math.floor(lo*10)/10;}
+function fitBoard(){const c=cells[0];if(!c||!c.clientWidth)return;
+  const hi=Math.min(c.clientWidth*0.2,c.clientHeight*0.34,64);
+  const v=biggest(9,Math.max(10,hi),px=>{board.style.setProperty('--qfs',px+'px');return cells.every(x=>{const q=x.firstChild;return q.scrollHeight<=x.clientHeight-px*1.0&&q.scrollWidth<=x.clientWidth;});});
+  board.style.setProperty('--qfs',v+'px');}
+function fitCard(){if(!wrap.classList.contains('open'))return;
+  const r=card.getBoundingClientRect();card.classList.toggle('vert',r.width>r.height*1.15);
+  const qfs=parseFloat(getComputedStyle(board).getPropertyValue('--qfs'))||16;
+  const hi=Math.min(Math.max(qfs*2.2,28),120);
+  const v=biggest(10,hi,px=>{body.style.setProperty('--cfs',px+'px');return body.scrollHeight<=body.clientHeight+1&&body.scrollWidth<=body.clientWidth+1;});
+  body.style.setProperty('--cfs',v+'px');}
+let tm;function refit(){clearTimeout(tm);tm=setTimeout(()=>{fitBoard();fitCard();},60);}
+addEventListener('resize',refit);addEventListener('orientationchange',()=>setTimeout(refit,300));
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(refit);
+
+/* ---------- 密碼門 ---------- */
+const gate=$('gate'),gin=$('gateInput'),gerr=$('gateErr');
+gin.addEventListener('input',()=>{gin.value=gin.value.replace(/\D/g,'').slice(0,3);gerr.textContent='';});
+$('gateForm').addEventListener('submit',e=>{e.preventDefault();
+  if(gin.value==='146'){gate.classList.add('hidden');document.body.classList.remove('locked');refit();return;}
+  gerr.textContent='密碼錯誤，請重新輸入';gin.value='';gin.focus();});
+setTimeout(()=>gin.focus(),80);
+paint();
+</script>
+<script src="game-bar.js?v=6"></script>
+</body>
+</html>
