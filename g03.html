@@ -2836,9 +2836,9 @@ document.getElementById('board').addEventListener('click',function(){
     if(!area||!area.offsetParent||!panel.getBoundingClientRect().width)return;
     var list=els(),base=list.map(function(e){return parseFloat(getComputedStyle(e).fontSize)||16;});
     var st=document.querySelector('#storyarea .stage'),b0=st?parseFloat(getComputedStyle(st).fontSize)||20:20;
-    var small=Math.min(innerWidth,innerHeight)<=500, maxPx=small?14:64;
-    var lo=small?0.4:0.6,hi=Math.max(lo+0.05,Math.min(2.6,maxPx/b0));
-    setK(list,base,lo);if(!fits()){if(!small)reset();return;}
+    var touch=window.matchMedia&&matchMedia('(pointer:coarse)').matches, small=Math.min(innerWidth,innerHeight)<=500, maxPx=small?12:(touch?15:64); // 手機最大約 12px；平板、摺疊機等觸控螢幕最大約 15px
+    var lo=(small||touch)?0.35:0.6,hi=Math.max(lo+0.05,Math.min(2.6,maxPx/b0));
+    setK(list,base,lo);if(!fits()){if(!small&&!touch)reset();return;}
     for(var k=0;k<10;k++){var mid=(lo+hi)/2;setK(list,base,mid);if(fits())lo=mid;else hi=mid;}
     setK(list,base,Math.floor(lo*100)/100);
   }finally{busy=false;}}
