@@ -2851,8 +2851,12 @@ document.getElementById('board').addEventListener('click',function(){
   later();
 })();</script>
 <style id="panel-wide-202611">
-/* 2026-11-04：桌機右邊故事欄加寬約兩倍（題目板會自動讓出空間）；手機不變 */
-@media (min-width:901px){.layout:not(.board-collapsed):not(.panel-collapsed) #panel{flex:0 0 clamp(440px,24vw,640px)!important;width:clamp(440px,24vw,640px)!important;max-width:none!important}}
+/* 2026-11-04：右邊故事欄固定佔畫面寬度的 1/3，左邊題目板佔 2/3（桌機、手機橫拿）。手機直拿維持上下排列 */
+@media (min-width:901px),(orientation:landscape){
+.layout:not(.board-collapsed):not(.panel-collapsed){display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:stretch!important}
+.layout:not(.board-collapsed):not(.panel-collapsed) #boardPanel{flex:1 1 0!important;min-width:0!important;width:auto!important;max-width:none!important}
+.layout:not(.board-collapsed):not(.panel-collapsed) #panel{flex:0 0 33.333%!important;width:33.333%!important;max-width:none!important;min-width:0!important;height:auto!important}
+}
 </style>
 <script src="game-bar.js?v=5"></script>
 </body>
