@@ -24,6 +24,14 @@ document.addEventListener('keydown',e=>{
   try{if(d.fullscreenElement)d.exitFullscreen();else{const p=d.documentElement.requestFullscreen();if(p&&p.catch)p.catch(()=>{});}}catch(_){}
 });
 if(inFrame){try{gameSync();}catch(e){console.warn('[遊戲同步] 啟動失敗',e);}return;}
+/* 2026-11-09：底部圖示列不用 2.5 秒自動隱藏；滑鼠移到畫面下方、或手機點一下就出現 */
+(()=>{const s2=document.createElement('style');s2.textContent='html.fs-idle #gameBar{opacity:0!important;visibility:hidden!important;transition:opacity .3s ease,visibility .3s}';document.head.appendChild(s2);
+  const d=document.documentElement;let t;
+  const over=()=>{const b=document.getElementById('gameBar');return !!(b&&b.matches(':hover'));};
+  const hide=()=>{if(over()){clearTimeout(t);t=setTimeout(hide,1200);return;}d.classList.add('fs-idle');};
+  const show=()=>{d.classList.remove('fs-idle');clearTimeout(t);t=setTimeout(hide,2500);};
+  addEventListener('mousemove',e=>{if(e.clientY>innerHeight-140)show();},{passive:true});
+  addEventListener('touchstart',show,{passive:true});addEventListener('keydown',show);show();})();
 /* 2026-11-04：在簡報同步視窗裡，遊戲裡的操作也讓手機、桌機同步。
    點擊、輸入、送出都會傳給另一台照做；變色賓果有隨機，所以改傳整個盤面。 */
 function gameSync(){
