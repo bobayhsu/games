@@ -27,7 +27,8 @@ if(inFrame){try{gameSync();}catch(e){console.warn('[遊戲同步] 啟動失敗',
 /* 2026-11-09：底部圖示列不用 2.5 秒自動隱藏；滑鼠移到畫面下方、或手機點一下就出現 */
 (()=>{const s2=document.createElement('style');s2.textContent='html.fs-idle #gameBar{opacity:0!important;visibility:hidden!important;transition:opacity .3s ease,visibility .3s}';document.head.appendChild(s2);
   const d=document.documentElement;let t;
-  const over=()=>{const b=document.getElementById('gameBar');return !!(b&&b.matches(':hover'));};
+  let tch=0;addEventListener('touchstart',()=>{tch=1;},{passive:true,capture:true});
+  const over=()=>{if(tch)return false;const b=document.getElementById('gameBar');return !!(b&&b.matches(':hover'));};
   const hide=()=>{if(over()){clearTimeout(t);t=setTimeout(hide,1200);return;}d.classList.add('fs-idle');};
   const show=()=>{d.classList.remove('fs-idle');clearTimeout(t);t=setTimeout(hide,2500);};
   addEventListener('mousemove',e=>{if(e.clientY>innerHeight-140)show();},{passive:true});
