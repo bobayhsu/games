@@ -291,6 +291,7 @@
 .tile-number{font-size:clamp(28px,6vw,96px)!important}
 @supports (font-size:1cqi){.tile-number{font-size:42cqi!important}}
 </style>
+<style>html,body,*{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}/* 防止 LINE 等手機瀏覽器自動放大文字 */</style>
 </head>
 <body>
   <main>
@@ -402,7 +403,7 @@
     updateStatus();
     document.getElementById('toGames').addEventListener('click', e => { e.preventDefault(); location.replace('index.html'); });
   </script>
-<script src="game-bar.js?v=10"></script>
+<script src="game-bar.js?v=11"></script>
 </body>
 </html>
 

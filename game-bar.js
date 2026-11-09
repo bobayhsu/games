@@ -12,7 +12,7 @@ st.textContent='body{padding-bottom:calc(var(--gbar,80px) + env(safe-area-inset-
  '#gameBar a{width:60px;height:60px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#FBF8F3;box-shadow:0 3px 8px rgba(0,0,0,.35);text-decoration:none;transition:transform .15s,background .15s}'+
  '#gameBar a:hover{transform:scale(1.08);background:#D2262E!important}'+
  '#gameBar svg{width:32px;height:32px}'+
- '@media (max-width:900px){#gameBar a{width:50px;height:50px}#gameBar svg{width:28px;height:28px}}'+'@media (max-width:520px){body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))!important}#gameBar{padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));gap:3px}#gameBar .g{gap:3px}#gameBar a{width:min(46px,calc((100vw - 52px) / 13));height:min(46px,calc((100vw - 52px) / 13))}#gameBar svg{width:60%;height:60%}}'+
+ '@media (max-width:900px){#gameBar a{width:50px;height:50px}#gameBar svg{width:28px;height:28px}}'+/* 2026-11-09 手機直式：圖示排成兩排（同五大類首頁），比較好按 */'@media (max-width:520px){body{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))!important}#gameBar{flex-direction:column;align-items:center;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));gap:8px}#gameBar .g{gap:min(2vw,8px);justify-content:center}#gameBar a{width:min(10vw,46px);height:min(10vw,46px)}#gameBar svg{width:58%;height:58%}}'+
  '';
 document.head.appendChild(st);
 const toG=document.getElementById('toGames');if(toG)toG.style.display='none';
